@@ -1,20 +1,16 @@
 # Name:     soil_moisture_monitor.py
 # By:       Christophe Landry & Zacharyah Whitcher
-# Date:     2023-04-28
+# Date:     2023-11-24
 # Version:  1.0
 
 # Imports
 import RPi.GPIO as GPIO
 import time
+import ADC0832_1
 
 # Motor Pins
 MotorPin_A = 5
 MotorPin_B = 6
-
-# Soil Moisture Pins
-ADC_CS = 24
-ADC_CLK = 23
-ADC_DIO = 18
 
 # Global Variables
 global motor_cooldown
@@ -24,8 +20,6 @@ motor_cooldown = False
 def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(ADC_CS, GPIO.OUT)
-	GPIO.setup(ADC_CLK, GPIO.OUT)
 	GPIO.setup(MotorPin_A, GPIO.OUT)
 	GPIO.setup(MotorPin_B, GPIO.OUT)
 	motorStop()
@@ -39,48 +33,6 @@ def destroy():
 def motorStop():
 	GPIO.output(MotorPin_A, GPIO.HIGH)
 	GPIO.output(MotorPin_B, GPIO.HIGH)
-
-# Calculate the results from the Sensor
-def getResult(): # ADC0832.py
-	GPIO.setup(ADC_DIO, GPIO.OUT)
-	GPIO.output(ADC_CS, 0)
-
-	GPIO.output(ADC_CLK, 0)
-	GPIO.output(ADC_DIO, 1);  time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 1);  time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 0)
-
-	GPIO.output(ADC_DIO, 1);  time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 1);  time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 0)
-
-	GPIO.output(ADC_DIO, 0);  time.sleep(0.000002)
-
-	GPIO.output(ADC_CLK, 1)
-	GPIO.output(ADC_DIO, 1);  time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 0)
-	GPIO.output(ADC_DIO, 1);  time.sleep(0.000002)
-
-	dat1 = 0
-	for i in range(0, 8):
-		GPIO.output(ADC_CLK, 1);  time.sleep(0.000002)
-		GPIO.output(ADC_CLK, 0);  time.sleep(0.000002)
-		GPIO.setup(ADC_DIO, GPIO.IN)
-		dat1 = dat1 << 1 | GPIO.input(ADC_DIO)  # or ?
-	
-	dat2 = 0
-	for i in range(0, 8):
-		dat2 = dat2 | GPIO.input(ADC_DIO) << i
-		GPIO.output(ADC_CLK, 1);  time.sleep(0.000002)
-		GPIO.output(ADC_CLK, 0);  time.sleep(0.000002)
-	
-	GPIO.output(ADC_CS, 1)
-	GPIO.setup(ADC_DIO, GPIO.OUT)
-
-	if dat1 == dat2:
-		return dat1
-	else:
-		return 0
 	
 # Turn motor on and off
 def motor(status, direction):
@@ -96,7 +48,7 @@ def motor(status, direction):
 
 # Read the sensor and return the results
 def readSensor(max_moisture=100, min_moisture=50):
-	res = getResult()
+	res = ADC0832_1.getADC(0)
 	moisture = ((255 - res) / 255) * 100
 	moisture = round(moisture, 2)
 	#print ('analog value: %03d  moisture: %d' %(res, moisture))
