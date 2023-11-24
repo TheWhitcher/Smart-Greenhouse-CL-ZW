@@ -11,7 +11,7 @@ import time
 import math
 
 # Fan Pins
-FAN = 17
+FAN = 4
 
 def setup():
 	GPIO.setmode(GPIO.BCM)

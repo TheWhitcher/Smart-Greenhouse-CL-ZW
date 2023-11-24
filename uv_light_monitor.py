@@ -9,7 +9,7 @@ import time
 import ADC0832_1
 
 # UV Light
-LED = 25
+LED = 27
 
 # Setup the Components
 def setup():

@@ -9,8 +9,7 @@ import time
 import ADC0832_1
 
 # Motor Pins
-MotorPin_A = 5
-MotorPin_B = 6
+WATER_PUMP = 22
 
 # Global Variables
 global motor_cooldown
@@ -20,8 +19,7 @@ motor_cooldown = False
 def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(MotorPin_A, GPIO.OUT)
-	GPIO.setup(MotorPin_B, GPIO.OUT)
+	GPIO.setup(WATER_PUMP, GPIO.OUT)
 	ADC0832_1.setup()
 	motorStop()
 
@@ -32,8 +30,7 @@ def destroy():
 
 # Stop the motor
 def motorStop():
-	GPIO.output(MotorPin_A, GPIO.HIGH)
-	GPIO.output(MotorPin_B, GPIO.HIGH)
+	GPIO.output(WATER_PUMP, GPIO.HIGH)
 	
 # Turn motor on and off
 def motor(status, direction):
@@ -41,14 +38,12 @@ def motor(status, direction):
 		motorStop()
 	else:
 		if direction == 1:
-			GPIO.output(MotorPin_A, GPIO.HIGH)
-			GPIO.output(MotorPin_B, GPIO.LOW)
+			GPIO.output(WATER_PUMP, GPIO.HIGH)
 		else:
-			GPIO.output(MotorPin_A, GPIO.LOW)
-			GPIO.output(MotorPin_B, GPIO.HIGH)
+			GPIO.output(WATER_PUMP, GPIO.LOW)
 
 # Read the sensor and return the results
-def readSensor(max_moisture=100, min_moisture=50):
+def readSensor():
 	res = ADC0832_1.getADC(0)
 	moisture = ((255 - res) / 255) * 100
 	moisture = round(moisture, 2)
