@@ -15,16 +15,20 @@ GPIO.setmode(GPIO.BCM)
 
 # change these as desired - they're the pins connected from the
 # SPI port on the ADC to the Cobbler
-PIN_CLK = 18
-PIN_DO  = 27
-PIN_DI  = 22
-PIN_CS  = 17
+PIN_CLK = 12
+PIN_DO  = 16
+PIN_DI  = 20
+PIN_CS  = 6
 
-# set up the SPI interface pins
-GPIO.setup(PIN_DI,  GPIO.OUT)
-GPIO.setup(PIN_DO,  GPIO.IN)
-GPIO.setup(PIN_CLK, GPIO.OUT)
-GPIO.setup(PIN_CS,  GPIO.OUT)
+def setup():
+        # set up the SPI interface pins
+        GPIO.setup(PIN_DI,  GPIO.OUT)
+        GPIO.setup(PIN_DO,  GPIO.IN)
+        GPIO.setup(PIN_CLK, GPIO.OUT)
+        GPIO.setup(PIN_CS,  GPIO.OUT)
+
+def destroy():
+        GPIO.cleanup()
 
 # read SPI data from ADC8032
 def getADC(channel):
@@ -60,6 +64,7 @@ def getADC(channel):
         return ad
 
 if __name__ == "__main__":
+        setup()
         while True:
                 print ("ADC[0]: {}\t ADC[1]: {}".format(getADC(0), getADC(1)))
                 time.sleep(1)

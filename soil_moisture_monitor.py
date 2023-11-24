@@ -22,6 +22,7 @@ def setup():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(MotorPin_A, GPIO.OUT)
 	GPIO.setup(MotorPin_B, GPIO.OUT)
+	ADC0832_1.setup()
 	motorStop()
 
 # Clean up the GPIO and stop the motor
