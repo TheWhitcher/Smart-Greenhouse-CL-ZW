@@ -15,10 +15,10 @@ GPIO.setmode(GPIO.BCM)
 
 # change these as desired - they're the pins connected from the
 # SPI port on the ADC to the Cobbler
-PIN_CLK = 12
-PIN_DO  = 16
-PIN_DI  = 20
-PIN_CS  = 6
+PIN_CLK = 18
+PIN_DO  = 13
+PIN_DI  = 23
+PIN_CS  = 5
 
 def setup():
         # set up the SPI interface pins
