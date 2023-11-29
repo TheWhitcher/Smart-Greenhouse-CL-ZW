@@ -10,6 +10,7 @@ import soil_moisture_monitor
 import time
 import threading
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+import json
 
 # Global Variables
 water_cooldown = 0
@@ -37,7 +38,12 @@ topic = "raspberry/templight" #MIght need to be changed // Name of the topic to 
 mqttc = AWSIoTMQTTClient(clientID)
 mqttc.configureEndpoint(endpoint,port)
 mqttc.configureCredentials("certs/AmazonRootCA1.pem","certs/raspberry-private.pem.key","certs/raspberry-certificate.pem.crt")
-	
+
+# Send message to MQTT
+def send_data(message):
+	mqttc.publish(topic,json.dumps(message),0)
+	print("Message Published: " + message)
+
 # Main Loop every 1 second
 def loop():
 	global water_cooldown
