@@ -32,6 +32,11 @@ clientID = "726084275207" #To be changed
 endpoint = "ajkrqd5g9a48e-ats.iot.us-east-1.amazonaws.com" #To be changed // Use the endpoint from the settings page in the IoT console 
 port = 8883 #Might need to be changed // MQTT port
 topic = "raspberry/templight" #MIght need to be changed // Name of the topic to publish to in the IoT console 
+
+# Init MQTT client
+mqttc = AWSIoTMQTTClient(clientID)
+mqttc.configureEndpoint(endpoint,port)
+mqttc.configureCredentials("certs/AmazonRootCA1.pem","certs/raspberry-private.pem.key","certs/raspberry-certificate.pem.crt")
 	
 # Main Loop every 1 second
 def loop():
@@ -74,10 +79,13 @@ def destroy():
 # Main Program
 if __name__ == '__main__':
 	setup()
-try:
-	loop()
-except KeyboardInterrupt: 
-	destroy()
-	print ('The end!')
-finally:
-	destroy()
+	try:
+		#Connect to MQTT
+		#mqttc.connect()
+		#print("Connect OK!")
+		loop()
+	except KeyboardInterrupt: 
+		destroy()
+		print ('The end!')
+	finally:
+		destroy()
