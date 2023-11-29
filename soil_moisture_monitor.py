@@ -12,35 +12,26 @@ import ADC0832_1
 WATER_PUMP = 22
 
 # Global Variables
-global motor_cooldown
-motor_cooldown = False
+pump_cooldown = False
 
 # Setup the Components
 def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(WATER_PUMP, GPIO.OUT)
+	GPIO.output(WATER_PUMP, GPIO.LOW)
 	ADC0832_1.setup()
-	motorStop()
 
-# Clean up the GPIO and stop the motor
+# Clean up the GPIO
 def destroy():
-	#motorStop() #Not needed
 	GPIO.cleanup()
-
-# Stop the motor
-def motorStop():
-	GPIO.output(WATER_PUMP, GPIO.HIGH)
 	
-# Turn motor on and off
-def motor(status, direction):
-	if status == 0: # stop
-		motorStop()
+# Turn the water pump on and off
+def handlePump(status=False):
+	if (status): # stop
+		GPIO.output(WATER_PUMP, GPIO.LOW)
 	else:
-		if direction == 1:
-			GPIO.output(WATER_PUMP, GPIO.HIGH)
-		else:
-			GPIO.output(WATER_PUMP, GPIO.LOW)
+		GPIO.output(WATER_PUMP, GPIO.HIGH)
 
 # Read the sensor and return the results
 def readSensor():
@@ -52,15 +43,15 @@ def readSensor():
 	return moisture
 	
 # Run the Water Motor
-def RunMotor():
-	global motor_cooldown
+def RunPump():
+	global pump_cooldown
 	
-	if(motor_cooldown != True):
-		motor_cooldown = True
-		motor(1,0)
+	if(not pump_cooldown):
+		pump_cooldown = True
+		handlePump(True)
 		time.sleep(10)
-		motor(0,0)
-		motor_cooldown = False
+		handlePump(False)
+		pump_cooldown = False
 		
 # Main loop every 0.5 seconds
 def loop():
