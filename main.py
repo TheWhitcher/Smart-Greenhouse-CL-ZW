@@ -45,7 +45,7 @@ mqttc.configureCredentials("Smart-Greenhouse/certs/AmazonRootCA1.pem","Smart-Gre
 # Send message to MQTT
 def send_data(message):
 	mqttc.publish(topic,json.dumps(message),0)
-	print("Message Published: " + message)
+	print("Message Published: " + str(message))
 
 # Main Loop every 1 second
 def loop():
@@ -56,21 +56,31 @@ def loop():
 	while True:
 		# Get Sensor readings
 		temperature = temperature_monitor.readSensor()
-		moisture = soil_moisture_monitor.readSensor()
+		soil_moisture = soil_moisture_monitor.readSensor()
 		light = uv_light_monitor.readSensor()
+
+		message = {
+			"Temperature": str(temperature),
+			"Light": str(light),
+			"Soil Moisture": str(soil_moisture)
+		}
+
+		send_data(message)
+
 		print("+-----------------------------------------------+")
 		print("| Type       Actual ")
 		print("| Temp	    "  + str(temperature))
-		print("| Humidity   "  + str(moisture))
+		print("| Humidity   "  + str(soil_moisture))
 		print("| Light	    "+ str(light))
 		print("+-----------------------------------------------+")
 		
 		# Run the sprinkler for 10 seconds
-		if(moisture <= min_moisture and (time.monotonic() - waterpump_cooldown) >= 60):
+		if(soil_moisture <= min_moisture and (time.monotonic() - waterpump_cooldown) >= 60):
 			# Start a new thread to run the motor concurrently
 			water_pump_thread = threading.Thread(target=soil_moisture_monitor.RunPump)
 			water_pump_thread.start()
 			waterpump_cooldown = time.monotonic()
+			#water_pump_thread.join()
 			
 		time.sleep(0.5)
 		
@@ -82,10 +92,10 @@ def destroy():
 if __name__ == '__main__':
 	setup()
 	try:
-
 		#Connect to MQTT
 		mqttc.connect()
 		print("Connect OK!")
+
 		loop()
 	except KeyboardInterrupt: 
 		destroy()
