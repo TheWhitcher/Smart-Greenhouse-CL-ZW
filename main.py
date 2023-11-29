@@ -38,14 +38,14 @@ port = 8883 #Might need to be changed // MQTT port
 topic = "raspberry/templight" #MIght need to be changed // Name of the topic to publish to in the IoT console 
 
 # Init MQTT client
-# mqttc = AWSIoTMQTTClient(clientID)
-# mqttc.configureEndpoint(endpoint,port)
-# mqttc.configureCredentials("certs/AmazonRootCA1.pem","certs/raspberry-private.pem.key","certs/raspberry-certificate.pem.crt")
+mqttc = AWSIoTMQTTClient(clientID)
+mqttc.configureEndpoint(endpoint,port)
+mqttc.configureCredentials("Smart-Greenhouse/certs/AmazonRootCA1.pem","Smart-Greenhouse/certs/raspberry-private.pem.key","Smart-Greenhouse/certs/raspberry-certificate.pem.crt")
 
 # Send message to MQTT
-# def send_data(message):
-# 	mqttc.publish(topic,json.dumps(message),0)
-# 	print("Message Published: " + message)
+def send_data(message):
+	mqttc.publish(topic,json.dumps(message),0)
+	print("Message Published: " + message)
 
 # Main Loop every 1 second
 def loop():
@@ -84,8 +84,8 @@ if __name__ == '__main__':
 	try:
 
 		#Connect to MQTT
-		#mqttc.connect()
-		#print("Connect OK!")
+		mqttc.connect()
+		print("Connect OK!")
 		loop()
 	except KeyboardInterrupt: 
 		destroy()
