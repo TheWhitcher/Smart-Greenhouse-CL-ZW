@@ -14,8 +14,7 @@ import json
 import RPi.GPIO as GPIO
 
 # Global Variables
-waterpump_runtime = 10
-waterpump_cooldown = 30
+waterpump_cooldown = 10
 min_moisture = 10
 
 # Do not need atm
@@ -39,17 +38,18 @@ port = 8883 #Might need to be changed // MQTT port
 topic = "raspberry/templight" #MIght need to be changed // Name of the topic to publish to in the IoT console 
 
 # Init MQTT client
-mqttc = AWSIoTMQTTClient(clientID)
-mqttc.configureEndpoint(endpoint,port)
-mqttc.configureCredentials("certs/AmazonRootCA1.pem","certs/raspberry-private.pem.key","certs/raspberry-certificate.pem.crt")
+# mqttc = AWSIoTMQTTClient(clientID)
+# mqttc.configureEndpoint(endpoint,port)
+# mqttc.configureCredentials("certs/AmazonRootCA1.pem","certs/raspberry-private.pem.key","certs/raspberry-certificate.pem.crt")
 
 # Send message to MQTT
-def send_data(message):
-	mqttc.publish(topic,json.dumps(message),0)
-	print("Message Published: " + message)
+# def send_data(message):
+# 	mqttc.publish(topic,json.dumps(message),0)
+# 	print("Message Published: " + message)
 
 # Main Loop every 1 second
 def loop():
+	global waterpump_cooldown
 	global min_moisture
 	
 	# Main loop
@@ -66,11 +66,11 @@ def loop():
 		print("+-----------------------------------------------+")
 		
 		# Run the sprinkler for 10 seconds
-		if(moisture <= min_moisture and (time.monotonic() - water_cooldown) >= 60):
+		if(moisture <= min_moisture and (time.monotonic() - waterpump_cooldown) >= 60):
 			# Start a new thread to run the motor concurrently
-			water_pump_thread = threading.Thread(target=soil_moisture_monitor.RunMotor)
+			water_pump_thread = threading.Thread(target=soil_moisture_monitor.RunPump)
 			water_pump_thread.start()
-			water_cooldown = time.monotonic()
+			waterpump_cooldown = time.monotonic()
 			
 		time.sleep(0.5)
 		
@@ -82,13 +82,13 @@ def destroy():
 if __name__ == '__main__':
 	setup()
 	try:
-		
+
 		#Connect to MQTT
 		#mqttc.connect()
 		#print("Connect OK!")
 		loop()
 	except KeyboardInterrupt: 
 		destroy()
-		print ('The end!')
+		print ('\nThe end!')
 	finally:
 		destroy()
