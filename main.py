@@ -9,6 +9,7 @@ import uv_light_monitor
 import soil_moisture_monitor
 import time
 import threading
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 # Global Variables
 water_cooldown = 0
@@ -25,6 +26,12 @@ def setup():
 	soil_moisture_monitor.setup()
 	temperature_monitor.setup()
 	uv_light_monitor.setup()
+
+# MQTT config (clientID must be unique within the AWS account)
+clientID = "726084275207" #To be changed
+endpoint = "ajkrqd5g9a48e-ats.iot.us-east-1.amazonaws.com" #To be changed // Use the endpoint from the settings page in the IoT console 
+port = 8883 #Might need to be changed // MQTT port
+topic = "raspberry/templight" #MIght need to be changed // Name of the topic to publish to in the IoT console 
 	
 # Main Loop every 1 second
 def loop():
