@@ -38,6 +38,33 @@ def loop():
       Tf = Tc * 1.8 + 32 # Convert to Farhenheit
       print('Tf : %.2f' %Tf)
       time.sleep(2)
+  
+def readSensor():
+  T25 = 25 + 273.15 #Convert to Kelvin
+  R25 = 10000 #Resistance for degrees in Celcius
+  B = 3455
+  
+  res = ADC0832_2.getADC(0)
+  Vr = 3.3 * float(res) / 255
+  #Rt = 10000 * Vr / (3.3 - Vr) //Our sensor is built different
+  if (Vr != 0):
+    Rt = (3.3 * 10000) / Vr - 10000
+    #print ('Rt : %.2f' %Rt)
+    if (Rt == 0):
+       Rt = 0.1
+    ln = math.log(Rt/R25)
+    Tk = 1 / ((ln / B) + (1/T25))
+    Tc = Tk - 273.15 # Convert to Celcius
+    #print('Tc : %.2f' %Tc)
+    Tf = Tc * 1.8 + 32 # Convert to Farhenheit
+    #print('Tf : %.2f' %Tf)
+    time.sleep(2)
+    
+    Tc = round(Tc, 2)
+    return Tc
+
+def destroy():
+    GPIO.cleanup()
 
 	# TODO fan logic
 	# if(temperature >= max_temp):

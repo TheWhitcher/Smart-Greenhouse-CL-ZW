@@ -16,7 +16,7 @@ water_cooldown = 0
 max_temp = 0
 min_temp = 0
 max_moisture = 0
-min_moisture = 0
+min_moisture = 10
 max_uv = 0
 min_uv = 0
 
@@ -46,8 +46,8 @@ def loop():
 	# Main loop
 	while True:
 		# Get Sensor readings
-		temperature = temperature_monitor.readSensors(max_temp, min_temp)
-		moisture = soil_moisture_monitor.readSensor(max_moisture, min_moisture)
+		temperature = temperature_monitor.readSensor()
+		moisture = soil_moisture_monitor.readSensor()
 		light = uv_light_monitor.readSensor(max_uv, min_uv)
 		print("+-----------------------------------------------+")
 		print("| Type       Min      Max      Actual ")

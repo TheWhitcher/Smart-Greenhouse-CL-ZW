@@ -24,7 +24,7 @@ def destroy():
 
 # Read the sensor and return the results
 def readSensor(max_uv=100, min_uv=50):
-	res = ADC0832_1.getADC(1) - 80
+	res = ADC0832_1.getADC(1)
 	if res < 0:
 		res = 0
 	if res > 100:
