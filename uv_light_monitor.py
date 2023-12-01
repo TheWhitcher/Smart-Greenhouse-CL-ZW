@@ -35,7 +35,6 @@ def readSensor(max_uv=100, min_uv=50):
 		GPIO.output(LED, GPIO.HIGH)
 	elif (res > (max_uv + min_uv) / 2 ):
 		GPIO.output(LED, GPIO.LOW)
-	return res
 
 # Main loop every 0.5 seconds
 def loop():

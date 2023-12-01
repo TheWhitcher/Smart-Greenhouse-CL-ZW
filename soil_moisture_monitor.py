@@ -26,7 +26,7 @@ def setup():
 def destroy():
 	GPIO.cleanup()
 	
-# Turn the water pump on and off
+# Turn the water pump on or off
 def handlePump(status=False):
 	if (status): # stop
 		GPIO.output(WATER_PUMP, GPIO.LOW)
@@ -42,14 +42,14 @@ def readSensor():
 		
 	return moisture
 	
-# Run the Water Motor
+# Run the water pump
 def RunPump():
 	global pump_cooldown
 	
 	if(not pump_cooldown):
 		pump_cooldown = True
 		handlePump(True)
-		time.sleep(10)
+		time.sleep(3)
 		handlePump(False)
 		pump_cooldown = False
 		

@@ -13,6 +13,9 @@ import math
 # Fan Pins
 FAN = 4
 
+# Global Variables
+fan_cooldown = False
+
 def setup():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(FAN, GPIO.OUT)
@@ -39,7 +42,7 @@ def loop():
       print('Tf : %.2f' %Tf)
       time.sleep(2)
 
-def readSensor(max_temp=35, min_temp=20):
+def readSensor():
   T25 = 25 + 273.15 #Convert to Kelvin
   R25 = 10000 #Resistance for degrees in Celcius
   B = 3455
@@ -55,18 +58,27 @@ def readSensor(max_temp=35, min_temp=20):
     ln = math.log(Rt/R25)
     Tk = 1 / ((ln / B) + (1/T25))
     Tc = Tk - 273.15 # Convert to Celcius
-    #print('Tc : %.2f' %Tc)
-    Tf = Tc * 1.8 + 32 # Convert to Farhenheit
-    #print('Tf : %.2f' %Tf)
-    time.sleep(2)
     
     Tc = round(Tc, 2)
-
-    if(Tc >= max_temp):
-      GPIO.output(FAN, GPIO.HIGH)
-    elif(Tc <= (max_temp + min_temp) / 2):
-      GPIO.output(FAN, GPIO.LOW)
     return Tc
+
+# Run the Fan
+def RunFan():
+	global fan_cooldown
+	
+	if(not fan_cooldown):
+		fan_cooldown = True
+		handleFan(True)
+		time.sleep(30)
+		handleFan(False)
+		fan_cooldown = False
+
+# Turn the fan on or off
+def handleFan(status=False):
+	if (status): # stop
+		GPIO.output(FAN, GPIO.HIGH)
+	else:
+		GPIO.output(FAN, GPIO.LOW)
 
 def destroy():
     GPIO.cleanup()
