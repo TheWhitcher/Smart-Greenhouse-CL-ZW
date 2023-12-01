@@ -30,14 +30,43 @@ def setup():
 	temperature_monitor.setup()
 	uv_light_monitor.setup()
 
-	max_temp = input("Set maximum TEMPERATURE threshold (Default value: 35): ")
-	min_temp = input("Set minimum TEMPERATURE threshold (Default value: 20): ")
-	min_moisture = input("Set minimum MOISTURE threshold between 1-100 (Default value: 10): ")
+	while True:
+		max_temp = input("\nSet maximum TEMPERATURE threshold (Default value: 35): ")
 
-	if (min_moisture < 1):
-		min_moisture = 1
-	elif (min_moisture > 100):
-		min_moisture = 100
+		try:
+			max_temp = int(max_temp)
+			break
+		except:
+			print("Invalid input, enter only whole numebrs.")
+
+	while True:
+		min_temp = input("\nSet minimum TEMPERATURE threshold (Default value: 20): ")
+
+		try:
+			min_temp = int(min_temp)
+
+			if (min_temp < max_temp):
+				break
+			else:
+				print("Minimum temperature must be greater than maximum temperature")
+		except:
+			print("Invalid input, enter only whole numebrs.")
+
+	while True:
+		min_moisture = input("\nSet minimum MOISTURE threshold between 1-100 (Default value: 10): ")
+
+		try:
+			min_moisture = int(min_moisture)
+
+			if (min_moisture < 1):
+				min_moisture = 1
+			elif (min_moisture > 100):
+				min_moisture = 100
+
+			break
+		except:
+			print("Invalid input, enter only whole numebrs.")
+
 
 # MQTT config (clientID must be unique within the AWS account)
 clientID = "726084275207" #To be changed
