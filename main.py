@@ -14,28 +14,36 @@ import json
 import RPi.GPIO as GPIO
 
 # Global Variables
-waterpump_cooldown = 10
+waterpump_cooldown = 3
+fan_cooldown = 30
+max_temp = 35
+min_temp = 20
 min_moisture = 10
-
-# Do not need atm
-# max_temp = 0
-# min_temp = 0
-# max_moisture = 0
-# max_uv = 0
-# min_uv = 0
 
 # Setup the Components
 def setup():
-	# Setup Sensors
+	global max_temp
+	global min_temp
+	global min_moisture
+
 	soil_moisture_monitor.setup()
 	temperature_monitor.setup()
 	uv_light_monitor.setup()
+
+	max_temp = input("Set maximum TEMPERATURE threshold (Default value: 35): ")
+	min_temp = input("Set minimum TEMPERATURE threshold (Default value: 20): ")
+	min_moisture = input("Set minimum MOISTURE threshold between 1-100 (Default value: 10): ")
+
+	if (min_moisture < 1):
+		min_moisture = 1
+	elif (min_moisture > 100):
+		min_moisture = 100
 
 # MQTT config (clientID must be unique within the AWS account)
 clientID = "726084275207" #To be changed
 endpoint = "ajkrqd5g9a48e-ats.iot.us-east-1.amazonaws.com" #To be changed // Use the endpoint from the settings page in the IoT console 
 port = 8883 #Might need to be changed // MQTT port
-topic = "raspberry/templight" #MIght need to be changed // Name of the topic to publish to in the IoT console 
+topic = "cl-zw/smart-greenhouse" #Might need to be changed // Name of the topic to publish to in the IoT console 
 
 # Init MQTT client
 mqttc = AWSIoTMQTTClient(clientID)
@@ -47,15 +55,16 @@ def send_data(message):
 	mqttc.publish(topic,json.dumps(message),0)
 	print("Message Published: " + str(message))
 
-# Main Loop every 1 second
 def loop():
 	global waterpump_cooldown
 	global min_moisture
 	
 	# Main loop
 	while True:
-		# Get Sensor readings
-		temperature = temperature_monitor.readSensor()
+		print(max_temp)
+		print(min_temp)
+		# Get Sensors readings
+		temperature = temperature_monitor.readSensor(max_temp, min_temp)
 		soil_moisture = soil_moisture_monitor.readSensor()
 		light = uv_light_monitor.readSensor()
 
@@ -67,20 +76,18 @@ def loop():
 
 		send_data(message)
 
-		print("+-----------------------------------------------+")
-		print("| Type       Actual ")
-		print("| Temp	    "  + str(temperature))
-		print("| Humidity   "  + str(soil_moisture))
-		print("| Light	    "+ str(light))
-		print("+-----------------------------------------------+")
+		# print("+-----------------------------------------------+")
+		# print("| Type       Actual ")
+		# print("| Temp	    "  + str(temperature))
+		# print("| Humidity   "  + str(soil_moisture))
+		# print("| Light	    "+ str(light))
+		# print("+-----------------------------------------------+")
 		
-		# Run the sprinkler for 10 seconds
+		# Run the water pump for 10 seconds
 		if(soil_moisture <= min_moisture and (time.monotonic() - waterpump_cooldown) >= 60):
-			# Start a new thread to run the motor concurrently
 			water_pump_thread = threading.Thread(target=soil_moisture_monitor.RunPump)
 			water_pump_thread.start()
 			waterpump_cooldown = time.monotonic()
-			#water_pump_thread.join()
 			
 		time.sleep(0.5)
 		
