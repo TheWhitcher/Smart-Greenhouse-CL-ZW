@@ -83,7 +83,7 @@ mqttc.configureCredentials("Smart-Greenhouse/certs/AmazonRootCA1.pem","Smart-Gre
 def send_data(message):
 	mqttc.publish(topic,json.dumps(message),0)
 	print("Message Published: " + str(message))
-
+	#test
 def loop():
 	global waterpump_cooldown
 	global min_moisture
