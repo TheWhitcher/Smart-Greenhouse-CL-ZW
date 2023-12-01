@@ -30,9 +30,9 @@ def setup():
 	temperature_monitor.setup()
 	uv_light_monitor.setup()
 
-	max_temp = input("Set maximum TEMPERATURE threshold (Default value: 35): ")
-	min_temp = input("Set minimum TEMPERATURE threshold (Default value: 20): ")
-	min_moisture = input("Set minimum MOISTURE threshold between 1-100 (Default value: 10): ")
+	max_temp = int(input("Set maximum TEMPERATURE threshold (Default value: 35): "))
+	min_temp = int(input("Set minimum TEMPERATURE threshold (Default value: 20): "))
+	min_moisture = int(input("Set minimum MOISTURE threshold between 1-100 (Default value: 10): "))
 
 	if (min_moisture < 1):
 		min_moisture = 1
