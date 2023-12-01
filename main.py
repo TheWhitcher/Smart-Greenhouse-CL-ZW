@@ -127,7 +127,5 @@ if __name__ == '__main__':
 		loop()
 	except KeyboardInterrupt: 
 		print('\nShutting Down...')
-	# except:
-	# 	print("\nFailed to connect to MQTT")
 	finally:
 		destroy()
