@@ -10,38 +10,52 @@ import ADC0832_2
 import time
 import math
 
-# Fan Pins
-FAN = 4
+# LED Pins
+LED = 4 # Tested with a LED because no availabl fan
+
+# Motor Pins
+FAN_PIN_A = 19
+FAN_PIN_B = 26
 
 # Global Variables
 fan_cooldown = False
 
 def setup():
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(FAN, GPIO.OUT)
-	GPIO.output(FAN, GPIO.LOW)
-	ADC0832_2.setup()
+  GPIO.setmode(GPIO.BCM)
+  GPIO.setup(LED, GPIO.OUT)
+  GPIO.output(LED, GPIO.LOW)
+  #GPIO.output(FAN_PIN_A, GPIO.OUT)
+  #GPIO.output(FAN_PIN_B, GPIO.OUT)
+  #fan_stop()
+  ADC0832_2.setup()
 
-def loop():
-  T25 = 25 + 273.15 #Convert to Kelvin
-  R25 = 10000 #Resistance for degrees in Celcius
-  B = 3455
+# Stop the fan
+def fan_stop():
+	GPIO.output(FAN_PIN_A, GPIO.HIGH)
+	GPIO.output(FAN_PIN_B, GPIO.HIGH)
 
-  while True:
-    res = ADC0832_2.getADC(0)
-    Vr = 3.3 * float(res) / 255
-    #Rt = 10000 * Vr / (3.3 - Vr) //Our sensor is built different
-    if (Vr != 0):
-      Rt = (3.3 * 10000) / Vr - 10000
-      #print ('Rt : %.2f' %Rt)
-      ln = math.log(Rt/R25)
-      Tk = 1 / ((ln / B) + (1/T25))
-      Tc = Tk - 273.15 # Convert to Celcius
-      print('Tc : %.2f' %Tc)
-      Tf = Tc * 1.8 + 32 # Convert to Farhenheit
-      print('Tf : %.2f' %Tf)
-      time.sleep(2)
+# Turn fan on and off
+def handleFan(status=0, direction=1):
+	if status == 0: # stop
+		fan_stop()
+	else:
+		if direction == 1:
+			GPIO.output(FAN_PIN_A, GPIO.HIGH)
+			GPIO.output(FAN_PIN_B, GPIO.LOW)
+		else:
+			GPIO.output(FAN_PIN_A, GPIO.LOW)
+			GPIO.output(FAN_PIN_B, GPIO.HIGH)
 
+# Run the fan.
+def RunFan():
+	global fan_cooldown
+  
+	if(not fan_cooldown):
+		fan_cooldown = True
+		handleFan(True)
+		time.sleep(30)
+		handleFan(False)
+		fan_cooldown = False
 def readSensor():
   T25 = 25 + 273.15 #Convert to Kelvin
   R25 = 10000 #Resistance for degrees in Celcius
@@ -62,23 +76,52 @@ def readSensor():
     Tc = round(Tc, 2)
     return Tc
 
-# Run the Fan
-def RunFan():
+# Manual override to turn the HVAC on and off.
+def manualOverride(status=False):
+	if(status):
+		handleLed(True)
+		#handleFan(1)
+	else:
+		handleLed(False)
+		#handleFan(0)
+
+# Run the LED *Note: Used for testing
+def RunLed():
 	global fan_cooldown
-	
+  
 	if(not fan_cooldown):
 		fan_cooldown = True
-		handleFan(True)
+		handleLed(True)
 		time.sleep(30)
-		handleFan(False)
+		handleLed(False)
 		fan_cooldown = False
-
-# Turn the fan on or off
-def handleFan(status=False):
+		
+# Turn the Led on or off *Note: Used for testing
+def handleLed(status=False):
 	if (status): # stop
-		GPIO.output(FAN, GPIO.HIGH)
+		GPIO.output(LED, GPIO.HIGH)
 	else:
-		GPIO.output(FAN, GPIO.LOW)
+		GPIO.output(LED, GPIO.LOW)
+		
+def loop():
+  T25 = 25 + 273.15 #Convert to Kelvin
+  R25 = 10000 #Resistance for degrees in Celcius
+  B = 3455
+
+  while True:
+    res = ADC0832_2.getADC(0)
+    Vr = 3.3 * float(res) / 255
+    #Rt = 10000 * Vr / (3.3 - Vr) //Our sensor is built different
+    if (Vr != 0):
+      Rt = (3.3 * 10000) / Vr - 10000
+      #print ('Rt : %.2f' %Rt)
+      ln = math.log(Rt/R25)
+      Tk = 1 / ((ln / B) + (1/T25))
+      Tc = Tk - 273.15 # Convert to Celcius
+      print('Tc : %.2f' %Tc)
+      Tf = Tc * 1.8 + 32 # Convert to Farhenheit
+      print('Tf : %.2f' %Tf)
+      time.sleep(2)
 
 def destroy():
     GPIO.cleanup()
