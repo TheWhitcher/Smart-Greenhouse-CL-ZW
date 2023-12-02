@@ -52,11 +52,18 @@ def RunPump():
 		time.sleep(3)
 		handlePump(False)
 		pump_cooldown = False
-		
+
+# Manual override to turn the water pump on and off.
+def manualOverride(status=False):
+	if(status):
+		handlePump(True)
+	else:
+		handlePump(False)
+
 # Main loop every 0.5 seconds
 def loop():
 	while True:
-		readSensor(150)
+		readSensor()
 
 # Main Program
 if __name__ == '__main__':

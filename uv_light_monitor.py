@@ -16,6 +16,7 @@ def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(LED, GPIO.OUT)
+	GPIO.output(LED, GPIO.LOW)
 	ADC0832_1.setup()
 
 # Clean up the GPIO
