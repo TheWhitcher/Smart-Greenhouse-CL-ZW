@@ -51,11 +51,17 @@ def on_message(client, userdata, message):
 	global fan_override
 	global water_pump_override
 
-	print(client)
-	print(userdata)
-	print(f"Received message on topic {message.topic}: {message.payload}")
-	print(message.payload.fan_override)
-	print(message.payload.water_pump_override)
+	#print(f"Received message on topic {message.topic}: {message.payload}")
+
+	# Decode the payload from bytes to a string
+	payload_str = message.payload.decode("utf-8")
+
+    # Parse the JSON payload
+	payload_json = json.loads(payload_str)
+
+    # Access the fan_override and water_pump_override values
+	fan_override = payload_json.get("fan_override")
+	water_pump_override = payload_json.get("water_pump_override")
 
 # Setup the program
 def setup():
