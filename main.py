@@ -12,10 +12,19 @@ import threading
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 import json
 import RPi.GPIO as GPIO
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Global Variables
 waterpump_cooldown = 3
 fan_cooldown = 30
+temp_alarm_cooldown = 300
+moisture_alarm_cooldown = 300
 
 max_temp = 30
 min_temp = 20
@@ -35,11 +44,82 @@ endpoint = "ajkrqd5g9a48e-ats.iot.us-east-1.amazonaws.com" #To be changed // Use
 port = 8883 #Might need to be changed // MQTT port
 uplink_topic = "tb/aws/iot/smart-greenhouse/sensors" #Might need to be changed // Name of the topic to publish to in the IoT console 
 downlink_topic = 'tb/aws/downlink'
-
-# Init MQTT client
 mqttc = AWSIoTMQTTClient(clientID)
-mqttc.configureEndpoint(endpoint,port)
-mqttc.configureCredentials("Smart-Greenhouse/certs/AmazonRootCA1.pem","Smart-Greenhouse/certs/raspberry-private.pem.key","Smart-Greenhouse/certs/raspberry-certificate.pem.crt")
+
+# Setup the program
+def setup():
+	soil_moisture_monitor.setup()
+	temperature_monitor.setup()
+	uv_light_monitor.setup()
+
+	getTempInput()
+	getMoistureInput()
+	getLightInput()
+
+# Setup the MQTTC connection
+def setup_mqttc():
+# Init MQTT client
+	mqttc.configureEndpoint(endpoint,port)
+	mqttc.configureCredentials("Smart-Greenhouse/certs/AmazonRootCA1.pem","Smart-Greenhouse/certs/raspberry-private.pem.key","Smart-Greenhouse/certs/raspberry-certificate.pem.crt")
+
+	print("\nConnecting to MQTT...")
+	mqttc.connect()
+	print("Connect OK!")
+
+	print("Subscribing to dashboard...")
+	mqttc.subscribe(downlink_topic, 1, on_message)
+	print("Subscribed to ", downlink_topic)
+
+# Send email to teacher
+def send_email(sensor="none", value=0.0):
+	print("Emailing Alarm...")
+
+	# Connect to the SMTP server (Gmail example)
+	smtp_server = "smtp.gmail.com"
+	smtp_port = 587
+	smtp_username = os.environ.get("SMTP_EMAIL")
+	smtp_password = os.environ.get("SMTP_PASS")
+
+	# Email configuration
+	sender_email = os.environ.get("SMTP_EMAIL")
+	receiver_email = os.environ.get("TEACHER_EMAIL")
+
+	if(sensor == "temperature"):
+		subject = "!! HIGH TEMPERATURE DETECTED !!"
+		body = f"Their has been a high temperature alarm triggered in your Smart Greenhouse. The maximum treshold is set to {max_temp} and the current temperature is {value}"
+	else:
+		subject = "!! LOW MOISTURE DETECTED !!"
+		body = f"Their has been a low soil moisture alarm triggered in your Smart Greenhouse. The minimum treshold is set to {min_moisture} and the current moisture is {value}"
+
+	# Set up the MIMEText object
+	message = MIMEMultipart()
+	message["From"] = sender_email
+	message["To"] = receiver_email
+	message["Subject"] = subject
+	message.attach(MIMEText(body, "plain"))
+
+	try:
+		# Create a connection to the SMTP server
+		with smtplib.SMTP(smtp_server, smtp_port) as server:
+			# Start TLS for security
+			server.starttls()
+
+			# Log in to the email account
+			server.login(smtp_username, smtp_password)
+
+			# Send the email
+			server.sendmail(sender_email, receiver_email, message.as_string())
+			
+			print("Email sent!")
+	except smtplib.SMTPAuthenticationError as e:
+		print(f"SMTP Authentication Error: {e}")
+		print("Failed to authenticate. Check your username and password.")
+	except smtplib.SMTPException as e:
+		print(f"SMTP Exception: {e}")
+		print("Failed to send email. Check your email configuration.")
+	except Exception as e:
+		print(f"An unexpected error occurred: {e}")
+		print("Failed to send email. Check your code and environment.")
 
 # Send message to MQTT
 def send_data(message):
@@ -52,39 +132,11 @@ def on_message(client, userdata, message):
 	global water_pump_override
 
 	#print(f"Received message on topic {message.topic}: {message.payload}")
-
-	# Decode the payload from bytes to a string
 	payload_str = message.payload.decode("utf-8")
-
-    # Parse the JSON payload
 	payload_json = json.loads(payload_str)
 
-    # Access the fan_override and water_pump_override values
 	fan_override = payload_json.get("fan_override")
 	water_pump_override = payload_json.get("water_pump_override")
-
-# Setup the program
-def setup():
-	soil_moisture_monitor.setup()
-	temperature_monitor.setup()
-	uv_light_monitor.setup()
-
-	# TODO: Uncomment before submitting
-	# getTempInput()
-	# getMoistureInput()
-	# getLightInput()
-
-# Setup the MQTTC connection
-def setup_mqttc():
-
-	print("\nConnecting to MQTT...")
-	mqttc.connect()
-	print("Connect OK!")
-
-	print("Subscribing to dashboard...")
-	#mqttc.onMessage = on_message
-	mqttc.subscribe(downlink_topic, 1, on_message)
-	print("Subscribed to ", downlink_topic)
 
 # Get and validate user input to set the maximum temperature.
 def getTempInput():
@@ -185,6 +237,8 @@ def getLightInput():
 def loop():
 	global waterpump_cooldown
 	global fan_cooldown
+	global temp_alarm_cooldown
+	global moisture_alarm_cooldown
 	global min_moisture
 	global fan_override
 	global water_pump_override
@@ -235,7 +289,19 @@ def loop():
 			#fan_thread = threading.Thread(target=temperature_monitor.RunFan)
 			fan_thread.start()
 			fan_cooldown = time.monotonic()
-			
+		
+		# Send an Alarm email when the temperature is too high
+		if(temperature > max_temp and (time.monotonic() - temp_alarm_cooldown) >= 300):
+			temp_email_thread = threading.Thread(target=send_email, args=("temperature", temperature))
+			temp_email_thread.start()
+			temp_alarm_cooldown = time.monotonic()
+
+		# Send an Alarm email when the temperature is too high
+		if(soil_moisture < min_moisture and (time.monotonic() - moisture_alarm_cooldown) >= 300):
+			moisture_email_thread = threading.Thread(target=send_email, args=("moisture", soil_moisture))
+			moisture_email_thread.start()
+			moisture_alarm_cooldown = time.monotonic()
+
 		time.sleep(2)
 		
 # Cleans up the GPIO
