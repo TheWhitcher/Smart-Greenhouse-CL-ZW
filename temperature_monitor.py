@@ -37,9 +37,11 @@ def fan_stop():
 # Turn fan on and off
 def handleFan(status=0, direction=1):
 	if status == 0: # stop
+		print("Fan Stop")
 		fan_stop()
 	else:
 		if direction == 1:
+			print("Fan On")
 			GPIO.output(FAN_PIN_A, GPIO.HIGH)
 			GPIO.output(FAN_PIN_B, GPIO.LOW)
 		else:
@@ -56,6 +58,8 @@ def RunFan():
 		time.sleep(30)
 		handleFan(False)
 		fan_cooldown = False
+		
+# Get the temperature value in Celsius.
 def readSensor():
   T25 = 25 + 273.15 #Convert to Kelvin
   R25 = 10000 #Resistance for degrees in Celcius
@@ -81,7 +85,7 @@ def manualOverride(status=False):
 	if(status):
 		handleLed(True)
 		#handleFan(1)
-	else:
+	elif (not fan_cooldown):
 		handleLed(False)
 		#handleFan(0)
 
@@ -99,8 +103,10 @@ def RunLed():
 # Turn the Led on or off *Note: Used for testing
 def handleLed(status=False):
 	if (status): # stop
+		#print("LED fan ON")
 		GPIO.output(LED, GPIO.HIGH)
 	else:
+		#print("LED fan OFF")
 		GPIO.output(LED, GPIO.LOW)
 		
 def loop():

@@ -33,8 +33,10 @@ def readSensor(max_uv=100, min_uv=50):
 	#print ('res = %d' % res)
 
 	if (res <= (max_uv + min_uv) / 2):
+		#print("Light On")
 		GPIO.output(LED, GPIO.HIGH)
 	elif (res > (max_uv + min_uv) / 2 ):
+		#print("Light Off")
 		GPIO.output(LED, GPIO.LOW)
 
 # Main loop every 0.5 seconds

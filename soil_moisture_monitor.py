@@ -29,9 +29,11 @@ def destroy():
 # Turn the water pump on or off
 def handlePump(status=False):
 	if (status): # stop
-		GPIO.output(WATER_PUMP, GPIO.LOW)
-	else:
+		print("Pump Runnning")
 		GPIO.output(WATER_PUMP, GPIO.HIGH)
+	elif(not pump_cooldown):
+		print("Pump Stopped")
+		GPIO.output(WATER_PUMP, GPIO.LOW)
 
 # Read the sensor and return the results
 def readSensor():

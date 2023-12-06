@@ -196,6 +196,9 @@ def loop():
 		soil_moisture = soil_moisture_monitor.readSensor()
 		uv_light_monitor.readSensor(max_light, min_light)
 
+		if(temperature is None):
+			temperature = 0.0
+
 		message = {
 			"val0": "loaded",
 			"val1": str(temperature),
