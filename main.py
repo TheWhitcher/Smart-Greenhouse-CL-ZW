@@ -17,6 +17,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import os
+import tkinter as tk
 
 load_dotenv()
 
@@ -45,6 +46,32 @@ port = 8883 #Might need to be changed // MQTT port
 uplink_topic = "tb/aws/iot/smart-greenhouse/sensors" #Might need to be changed // Name of the topic to publish to in the IoT console 
 downlink_topic = 'tb/aws/downlink'
 mqttc = AWSIoTMQTTClient(clientID)
+
+# Fan override.
+def fan_override_button():
+	global fan_override
+	return not fan_override
+
+# Pump override.
+def pump_override_button():
+	global water_pump_override
+	return not water_pump_override
+
+# Setting up the GUI
+def setup_gui():
+	# Create the main window
+	root = tk.Tk()
+	root.title("Override System")
+
+	# Create two buttons
+	fan_button = tk.Button(root, text="Fan Override", command=fan_override_button)
+	pump_button = tk.Button(root, text="Pump Override", command=pump_override_button)
+
+	fan_button.pack(pady=10)
+	pump_button.pack(pady=10)
+
+	root.mainloop()
+
 
 # Setup the program
 def setup():
@@ -131,7 +158,7 @@ def on_message(client, userdata, message):
 	global fan_override
 	global water_pump_override
 
-	#print(f"Received message on topic {message.topic}: {message.payload}")
+	print(f"Received message on topic {message.topic}: {message.payload}")
 	payload_str = message.payload.decode("utf-8")
 	payload_json = json.loads(payload_str)
 
@@ -313,6 +340,7 @@ if __name__ == '__main__':
 	setup()
 	try:
 		setup_mqttc()
+		#setup_gui() Not working
 		loop()
 	except KeyboardInterrupt: 
 		print('\nShutting Down...')

@@ -65,11 +65,19 @@ def manualOverride(status=False):
 # Main loop every 0.5 seconds
 def loop():
 	while True:
-		readSensor()
+		res = readSensor()
+
+		if(res > 0):
+			handlePump(True)
+		else:
+			handlePump(False)
+		time.sleep(2)
+		
 
 # Main Program
 if __name__ == '__main__':
 	setup()
+	print("testing...")
 	try:
 		loop()
 	except KeyboardInterrupt: 
