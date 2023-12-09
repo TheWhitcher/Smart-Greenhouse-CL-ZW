@@ -312,8 +312,8 @@ def loop():
 
 		# Run the fan for 30 seconds
 		if(not fan_override and temperature > max_temp and (time.monotonic() - fan_cooldown) >= 60):
-			fan_thread = threading.Thread(target=temperature_monitor.RunLed) # Used for testing.
-			#fan_thread = threading.Thread(target=temperature_monitor.RunFan)
+			#fan_thread = threading.Thread(target=temperature_monitor.RunLed) # Used for testing.
+			fan_thread = threading.Thread(target=temperature_monitor.RunFan)
 			fan_thread.start()
 			fan_cooldown = time.monotonic()
 		

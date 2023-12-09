@@ -21,14 +21,14 @@ FAN_PIN_B = 26
 fan_cooldown = False
 
 def setup():
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(LED, GPIO.OUT)
-  GPIO.output(LED, GPIO.LOW)
-  #GPIO.setup(FAN_PIN_A, GPIO.OUT)
-  #GPIO.setup(FAN_PIN_B, GPIO.OUT)
-  #GPIO.output(FAN_PIN_A, GPIO.OUT)
-  #GPIO.output(FAN_PIN_B, GPIO.OUT)
-  #fan_stop()
+  #GPIO.setmode(GPIO.BCM)
+  #GPIO.setup(LED, GPIO.OUT)
+  #GPIO.output(LED, GPIO.LOW)
+  GPIO.setup(FAN_PIN_A, GPIO.OUT)
+  GPIO.setup(FAN_PIN_B, GPIO.OUT)
+  GPIO.output(FAN_PIN_A, GPIO.OUT)
+  GPIO.output(FAN_PIN_B, GPIO.OUT)
+  fan_stop()
   ADC0832_2.setup()
 
 # Stop the fan
@@ -85,11 +85,11 @@ def readSensor():
 # Manual override to turn the HVAC on and off.
 def manualOverride(status=False):
 	if(status):
-		handleLed(True)
-		#handleFan(1)
+		#handleLed(True)
+		handleFan(1)
 	elif (not fan_cooldown):
-		handleLed(False)
-		#handleFan(0)
+		#handleLed(False)
+		handleFan(0)
 
 # Run the LED *Note: Used for testing
 def RunLed():
