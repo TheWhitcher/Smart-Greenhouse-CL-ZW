@@ -34,15 +34,15 @@ If you want to have you own smart green house you will need the following:
 
 To build the green house the components need to be connected to the following GPIO on the breadboard.
 
--ADC 1: CS: Vcc: CLK: DO: DI:
--ADC 2: CS: Vcc: CLK: DO: DI:
+-ADC 1: CS: GPIO 6 CLK: GPIO 12 DO: GPIO 16 DI: GPIO 20
+-ADC 2: CS: GPIO 5 CLK: GPIO 18 DO: GPIO 13 DI: GPIO 23
 -Soil Moisture Sensor & CM: Chanel 0 of ADC1  
 -Light Sensor: Chanel 1 of ADC1
 -Temperature Sensor: Chanel 0 of ADC2
 -LED Light: GPIO 27
 -Fan: GPIO 14
--Relay: 
--Water Pump:
+-Relay: GPIO 22
+-Water Pump: Red wire to the C of the Relay, Black wire additional power supply.
 
 *******************************************************************************************
 
