@@ -40,7 +40,8 @@ To build the green house the components need to be connected to the following GP
 -Light Sensor: Chanel 1 of ADC1
 -Temperature Sensor: Chanel 0 of ADC2
 -LED Light: GPIO 27
--Fan: GPIO 14
+-Fan (LED): GPIO 4
+-Fan (Real one): PIN A = GPIO 19, PIN B = GPIO 26
 -Relay: GPIO 22
 -Water Pump: Red wire to the C of the Relay, Black wire additional power supply.
 
