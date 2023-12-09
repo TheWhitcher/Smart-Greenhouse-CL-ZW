@@ -24,6 +24,8 @@ def setup():
   GPIO.setmode(GPIO.BCM)
   GPIO.setup(LED, GPIO.OUT)
   GPIO.output(LED, GPIO.LOW)
+  #GPIO.setup(FAN_PIN_A, GPIO.OUT)
+  #GPIO.setup(FAN_PIN_B, GPIO.OUT)
   #GPIO.output(FAN_PIN_A, GPIO.OUT)
   #GPIO.output(FAN_PIN_B, GPIO.OUT)
   #fan_stop()
